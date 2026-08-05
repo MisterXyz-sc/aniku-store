@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Baloo_2, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import Image from 'next/image';
+import Link from 'next/link';
 import './globals.css';
 
 const display = Baloo_2({
@@ -58,6 +59,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Pembayaran diproses aman lewat QRIS.
             <br />
             Aniku Store bukan bagian dari Sakurupiah.
+            <br />
+            <Link href="/cek-status" className="mt-1 inline-block text-paper-muted underline decoration-ink-line underline-offset-2 hover:text-paper transition">
+              Cek status transaksi
+            </Link>
           </footer>
         </div>
       </body>

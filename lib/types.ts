@@ -43,3 +43,25 @@ export interface ManualPaymentItem {
   manual_note: string | null;
   created_at: string;
 }
+
+// --- /cek-status (pengecekan transaksi mandiri sama user) ---
+
+export type StatusKind = 'pending' | 'review' | 'good' | 'bad';
+
+export interface TransactionItem {
+  type: 'premium' | 'diamond';
+  merchant_ref: string;
+  label: string; // nama paket Premium, atau "Top-up X Diamond"
+  amount: number; // rupiah
+  is_manual: boolean;
+  status_label: string; // udah diterjemahin, siap ditampilin
+  status_kind: StatusKind;
+  manual_note: string | null; // catatan yang DIKETIK USER SENDIRI, bukan data admin
+  created_at: string;
+}
+
+export interface TransactionLookupResponse {
+  username?: string;
+  items?: TransactionItem[];
+  error?: string;
+}
