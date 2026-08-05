@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { CheckCircle2, ChevronLeft, ExternalLink, AlertCircle, Loader2 } from 'lucide-react';
 import type { CheckoutResponse } from '@/lib/types';
 
 type Step = 'amount' | 'paying' | 'success';
@@ -68,7 +69,9 @@ export default function DiamondPage() {
   if (step === 'success') {
     return (
       <div className="flex flex-col items-center text-center gap-4 pt-10 animate-rise-in">
-        <div className="w-16 h-16 rounded-full bg-good/15 flex items-center justify-center text-3xl">✅</div>
+        <div className="w-16 h-16 rounded-full bg-good/15 flex items-center justify-center">
+          <CheckCircle2 size={30} strokeWidth={2} className="text-good" />
+        </div>
         <div>
           <h2 className="font-display font-bold text-lg">Pembayaran berhasil</h2>
           <p className="mt-1 text-sm text-paper-muted">
@@ -127,9 +130,10 @@ export default function DiamondPage() {
                 href={invoice.checkout_url}
                 target="_blank"
                 rel="noreferrer"
-                className="text-center rounded-full border border-ink-line py-2.5 text-sm font-semibold transition hover:border-diamond/60 hover:text-diamond"
+                className="flex items-center justify-center gap-1.5 rounded-full border border-ink-line py-2.5 text-sm font-semibold transition hover:border-diamond/60 hover:text-diamond"
               >
                 Buka halaman pembayaran
+                <ExternalLink size={14} strokeWidth={2.25} />
               </a>
             )}
           </div>
@@ -144,8 +148,8 @@ export default function DiamondPage() {
 
   return (
     <div className="flex flex-col gap-5 animate-rise-in">
-      <Link href="/" className="text-xs text-paper-muted w-fit hover:text-paper transition">
-        ‹ Kembali
+      <Link href="/" className="flex items-center gap-1 text-xs text-paper-muted w-fit hover:text-paper transition">
+        <ChevronLeft size={14} strokeWidth={2.5} /> Kembali
       </Link>
 
       <div>
@@ -199,13 +203,18 @@ export default function DiamondPage() {
         </p>
       </div>
 
-      {error && <p className="text-sm text-bad">{error}</p>}
+      {error && (
+        <p className="flex items-start gap-1.5 text-sm text-bad">
+          <AlertCircle size={16} strokeWidth={2.25} className="shrink-0 mt-0.5" /> {error}
+        </p>
+      )}
 
       <button
         disabled={!userNumber.trim() || amount < 500 || submitting}
         onClick={handleSubmit}
-        className="rounded-full bg-diamond text-ink font-bold py-3.5 text-sm transition hover:bg-diamond-dark hover:text-paper disabled:opacity-40 disabled:hover:bg-diamond disabled:hover:text-ink"
+        className="flex items-center justify-center gap-2 rounded-full bg-diamond text-ink font-bold py-3.5 text-sm transition hover:bg-diamond-dark hover:text-paper disabled:opacity-40 disabled:hover:bg-diamond disabled:hover:text-ink"
       >
+        {submitting && <Loader2 size={16} strokeWidth={2.5} className="animate-spin" />}
         {submitting ? 'Memproses...' : 'Buat pesanan'}
       </button>
     </div>
