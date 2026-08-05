@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Info, Upload, Clock } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Info, Upload, Clock, Download } from 'lucide-react';
 import type { ManualCheckoutResponse } from '@/lib/types';
 
 type Step = 'amount' | 'proof' | 'waiting' | 'success';
@@ -40,6 +40,23 @@ export default function DiamondManualPage() {
   }, [step, order]);
 
   const formatRupiah = (n: number) => 'Rp' + n.toLocaleString('id-ID');
+
+  async function handleDownloadQR() {
+    try {
+      const res = await fetch('/manual-qris-qr.png');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `qris-aniku-${order?.merchant_ref ?? 'diamond'}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open('/manual-qris-qr.png', '_blank');
+    }
+  }
 
   async function handleCreateOrder() {
     if (!userNumber.trim() || amount < 500) return;
@@ -152,11 +169,18 @@ export default function DiamondManualPage() {
               {formatRupiah(order.amount ?? 0)} · ≈ {(order.diamond_amount ?? 0).toLocaleString('id-ID')} Diamond untuk{' '}
               <span className="text-paper font-semibold">{order.username ?? `#${userNumber}`}</span>
             </p>
-            <div className="bg-white rounded-2xl p-3 mx-auto mt-4 w-56 h-56 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-3 mx-auto mt-4 w-full max-w-[300px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/manual-qris.png" alt="QRIS" className="w-full h-full object-contain" />
+              <img src="/manual-qris-qr.png" alt="QRIS" className="w-full h-auto" />
             </div>
           </div>
+
+          <button
+            onClick={handleDownloadQR}
+            className="flex items-center justify-center gap-1.5 rounded-full border border-ink-line text-paper font-semibold py-2.5 text-xs mt-4 mx-5 transition hover:border-diamond/60 hover:text-diamond"
+          >
+            <Download size={14} strokeWidth={2.5} /> Download QRIS
+          </button>
           <div className="ticket-divider" />
           <div className="px-5 pt-4 pb-5 flex flex-col gap-3">
             {order.merchant_ref && (
