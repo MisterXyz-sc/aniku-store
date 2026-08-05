@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import type { CheckoutResponse } from '@/lib/types';
 
 type Step = 'amount' | 'paying' | 'success';
@@ -66,13 +67,15 @@ export default function DiamondPage() {
 
   if (step === 'success') {
     return (
-      <div className="flex flex-col items-center text-center gap-4 pt-10">
-        <div className="text-5xl">✅</div>
-        <h2 className="text-lg font-bold">Pembayaran Berhasil!</h2>
-        <p className="text-sm text-white/60">
-          {estimatedDiamond} Diamond udah masuk ke akun{' '}
-          <span className="font-semibold text-white">{invoice?.username ?? `#${userNumber}`}</span>.
-        </p>
+      <div className="flex flex-col items-center text-center gap-4 pt-10 animate-rise-in">
+        <div className="w-16 h-16 rounded-full bg-good/15 flex items-center justify-center text-3xl">✅</div>
+        <div>
+          <h2 className="font-display font-bold text-lg">Pembayaran berhasil</h2>
+          <p className="mt-1 text-sm text-paper-muted">
+            {estimatedDiamond.toLocaleString('id-ID')} Diamond udah masuk ke akun{' '}
+            <span className="font-semibold text-paper">{invoice?.username ?? `#${userNumber}`}</span>.
+          </p>
+        </div>
         <button
           onClick={() => {
             setStep('amount');
@@ -80,9 +83,9 @@ export default function DiamondPage() {
             setInvoice(null);
             setTopupRef(null);
           }}
-          className="mt-2 rounded-full bg-sky-400 text-black font-semibold px-6 py-2 text-sm"
+          className="mt-2 rounded-full bg-diamond text-ink font-bold px-6 py-2.5 text-sm transition hover:bg-diamond-dark hover:text-paper"
         >
-          Top-up Lagi
+          Top-up lagi
         </button>
       </div>
     );
@@ -90,34 +93,49 @@ export default function DiamondPage() {
 
   if (step === 'paying' && invoice) {
     return (
-      <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">Scan QRIS Buat Bayar</h2>
-        <p className="text-sm text-white/60">
-          {formatRupiah(amount)} · sekitar {estimatedDiamond} Diamond untuk{' '}
-          <span className="text-white font-semibold">{invoice.username ?? `#${userNumber}`}</span>
-        </p>
+      <div className="flex flex-col gap-4 animate-rise-in">
+        <h2 className="font-display font-bold text-lg">Scan QRIS buat bayar</h2>
 
-        {invoice.qr ? (
-          <div className="bg-white rounded-2xl p-3 mx-auto w-64 h-64 flex items-center justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={invoice.qr} alt="QRIS" className="w-full h-full object-contain" />
+        <div className="ticket overflow-hidden">
+          <div className="px-5 pt-5 pb-4">
+            <p className="text-xs text-paper-muted">
+              {formatRupiah(amount)} · ≈ {estimatedDiamond.toLocaleString('id-ID')} Diamond untuk{' '}
+              <span className="text-paper font-semibold">{invoice.username ?? `#${userNumber}`}</span>
+            </p>
+
+            {invoice.qr ? (
+              <div className="bg-white rounded-2xl p-3 mx-auto mt-4 w-56 h-56 flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={invoice.qr} alt="QRIS" className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <p className="text-sm text-paper-muted text-center mt-4">QR gak tersedia buat metode ini.</p>
+            )}
           </div>
-        ) : (
-          <p className="text-sm text-white/50 text-center">QR gak tersedia buat metode ini.</p>
-        )}
 
-        {invoice.checkout_url && (
-          <a
-            href={invoice.checkout_url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-center rounded-full border border-aniku-border py-2.5 text-sm font-semibold"
-          >
-            Buka Halaman Pembayaran
-          </a>
-        )}
+          <div className="ticket-divider" />
 
-        <p className="text-xs text-white/40 text-center">
+          <div className="px-5 pt-4 pb-5 flex flex-col gap-3">
+            {invoice.merchant_ref && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-paper-muted">Ref. transaksi</span>
+                <span className="font-mono tabular text-paper">{invoice.merchant_ref}</span>
+              </div>
+            )}
+            {invoice.checkout_url && (
+              <a
+                href={invoice.checkout_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-center rounded-full border border-ink-line py-2.5 text-sm font-semibold transition hover:border-diamond/60 hover:text-diamond"
+              >
+                Buka halaman pembayaran
+              </a>
+            )}
+          </div>
+        </div>
+
+        <p className="text-xs text-paper-muted text-center">
           Halaman ini otomatis update begitu pembayaran terverifikasi. Jangan tutup dulu.
         </p>
       </div>
@@ -125,19 +143,25 @@ export default function DiamondPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-lg font-bold">Top-up Diamond</h1>
-      <p className="text-sm text-white/50">Dipakai buat bikin & kontribusi Clan.</p>
+    <div className="flex flex-col gap-5 animate-rise-in">
+      <Link href="/" className="text-xs text-paper-muted w-fit hover:text-paper transition">
+        ‹ Kembali
+      </Link>
+
+      <div>
+        <h1 className="font-display font-bold text-xl">Top-up Diamond</h1>
+        <p className="mt-1 text-sm text-paper-muted">Dipakai buat bikin &amp; kontribusi Clan.</p>
+      </div>
 
       <div className="flex gap-2">
         {PRESETS.map((p) => (
           <button
             key={p}
             onClick={() => setAmount(p)}
-            className={`flex-1 rounded-xl border py-2 text-xs font-semibold ${
+            className={`flex-1 rounded-xl border py-2.5 text-xs font-bold transition ${
               amount === p
-                ? 'border-sky-400 text-sky-400 bg-sky-400/10'
-                : 'border-aniku-border text-white/60'
+                ? 'border-diamond text-diamond bg-diamond/10'
+                : 'border-ink-line text-paper-muted hover:border-ink-line hover:text-paper'
             }`}
           >
             Rp{(p / 1000).toFixed(0)}rb
@@ -146,43 +170,43 @@ export default function DiamondPage() {
       </div>
 
       <div>
-        <label className="text-xs text-white/50">Nominal (Rp)</label>
+        <label className="text-xs text-paper-muted">Nominal (Rp)</label>
         <input
           type="number"
           value={amount}
           min={500}
           max={2000000}
           onChange={(e) => setAmount(Number(e.target.value))}
-          className="mt-1 w-full rounded-xl bg-aniku-card border border-aniku-border px-4 py-3 text-sm outline-none focus:border-sky-400/60"
+          className="mt-1.5 w-full rounded-xl bg-ink-field border border-ink-line px-4 py-3 text-sm font-mono tabular outline-none transition focus:border-diamond/60"
         />
-        <p className="mt-1 text-[11px] text-white/40">
+        <p className="mt-1.5 text-[11px] text-paper-muted">
           Min Rp500 · Max Rp2.000.000 · ≈ {estimatedDiamond.toLocaleString('id-ID')} Diamond
         </p>
       </div>
 
       <div>
-        <label className="text-xs text-white/50">ID Aniku kamu</label>
+        <label className="text-xs text-paper-muted">ID Aniku kamu</label>
         <input
           type="number"
           inputMode="numeric"
           value={userNumber}
           onChange={(e) => setUserNumber(e.target.value)}
           placeholder="misal: 1409"
-          className="mt-1 w-full rounded-xl bg-aniku-card border border-aniku-border px-4 py-3 text-sm outline-none focus:border-sky-400/60"
+          className="mt-1.5 w-full rounded-xl bg-ink-field border border-ink-line px-4 py-3 text-sm font-mono outline-none transition focus:border-diamond/60"
         />
-        <p className="mt-1 text-[11px] text-white/40">
+        <p className="mt-1.5 text-[11px] text-paper-muted">
           ID ini ada di profil kamu di app Aniku (angka setelah tanda #).
         </p>
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-bad">{error}</p>}
 
       <button
         disabled={!userNumber.trim() || amount < 500 || submitting}
         onClick={handleSubmit}
-        className="rounded-full bg-sky-400 text-black font-semibold py-3 text-sm disabled:opacity-40"
+        className="rounded-full bg-diamond text-ink font-bold py-3.5 text-sm transition hover:bg-diamond-dark hover:text-paper disabled:opacity-40 disabled:hover:bg-diamond disabled:hover:text-ink"
       >
-        {submitting ? 'Memproses...' : 'Buat Pesanan'}
+        {submitting ? 'Memproses...' : 'Buat pesanan'}
       </button>
     </div>
   );

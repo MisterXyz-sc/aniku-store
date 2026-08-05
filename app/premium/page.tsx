@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabasePublic } from '@/lib/supabasePublic';
 import type { PremiumPackage, CheckoutResponse } from '@/lib/types';
 
@@ -77,13 +78,15 @@ export default function PremiumPage() {
 
   if (step === 'success') {
     return (
-      <div className="flex flex-col items-center text-center gap-4 pt-10">
-        <div className="text-5xl">✅</div>
-        <h2 className="text-lg font-bold">Pembayaran Berhasil!</h2>
-        <p className="text-sm text-white/60">
-          Premium buat akun <span className="font-semibold text-white">{invoice?.username ?? `#${userNumber}`}</span> udah aktif.
-          Buka lagi app Aniku buat lihat perubahannya.
-        </p>
+      <div className="flex flex-col items-center text-center gap-4 pt-10 animate-rise-in">
+        <div className="w-16 h-16 rounded-full bg-good/15 flex items-center justify-center text-3xl">✅</div>
+        <div>
+          <h2 className="font-display font-bold text-lg">Pembayaran berhasil</h2>
+          <p className="mt-1 text-sm text-paper-muted">
+            Premium buat akun <span className="font-semibold text-paper">{invoice?.username ?? `#${userNumber}`}</span> udah aktif.
+            Buka lagi app Aniku buat lihat perubahannya.
+          </p>
+        </div>
         <button
           onClick={() => {
             setStep('pick');
@@ -92,9 +95,9 @@ export default function PremiumPage() {
             setInvoice(null);
             setClaimId(null);
           }}
-          className="mt-2 rounded-full bg-aniku-gold text-black font-semibold px-6 py-2 text-sm"
+          className="mt-2 rounded-full bg-gold text-ink font-bold px-6 py-2.5 text-sm transition hover:bg-gold-dark hover:text-paper"
         >
-          Beli Lagi
+          Beli lagi
         </button>
       </div>
     );
@@ -102,34 +105,49 @@ export default function PremiumPage() {
 
   if (step === 'paying' && invoice) {
     return (
-      <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">Scan QRIS Buat Bayar</h2>
-        <p className="text-sm text-white/60">
-          {selected?.label} untuk <span className="text-white font-semibold">{invoice.username ?? `#${userNumber}`}</span> —{' '}
-          {formatRupiah(selected?.price ?? 0)}
-        </p>
+      <div className="flex flex-col gap-4 animate-rise-in">
+        <h2 className="font-display font-bold text-lg">Scan QRIS buat bayar</h2>
 
-        {invoice.qr ? (
-          <div className="bg-white rounded-2xl p-3 mx-auto w-64 h-64 flex items-center justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={invoice.qr} alt="QRIS" className="w-full h-full object-contain" />
+        <div className="ticket overflow-hidden">
+          <div className="px-5 pt-5 pb-4">
+            <p className="text-xs text-paper-muted">
+              {selected?.label} untuk <span className="text-paper font-semibold">{invoice.username ?? `#${userNumber}`}</span>{' '}
+              · {formatRupiah(selected?.price ?? 0)}
+            </p>
+
+            {invoice.qr ? (
+              <div className="bg-white rounded-2xl p-3 mx-auto mt-4 w-56 h-56 flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={invoice.qr} alt="QRIS" className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <p className="text-sm text-paper-muted text-center mt-4">QR gak tersedia buat metode ini.</p>
+            )}
           </div>
-        ) : (
-          <p className="text-sm text-white/50 text-center">QR gak tersedia buat metode ini.</p>
-        )}
 
-        {invoice.checkout_url && (
-          <a
-            href={invoice.checkout_url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-center rounded-full border border-aniku-border py-2.5 text-sm font-semibold"
-          >
-            Buka Halaman Pembayaran
-          </a>
-        )}
+          <div className="ticket-divider" />
 
-        <p className="text-xs text-white/40 text-center">
+          <div className="px-5 pt-4 pb-5 flex flex-col gap-3">
+            {invoice.merchant_ref && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-paper-muted">Ref. transaksi</span>
+                <span className="font-mono tabular text-paper">{invoice.merchant_ref}</span>
+              </div>
+            )}
+            {invoice.checkout_url && (
+              <a
+                href={invoice.checkout_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-center rounded-full border border-ink-line py-2.5 text-sm font-semibold transition hover:border-gold/60 hover:text-gold"
+              >
+                Buka halaman pembayaran
+              </a>
+            )}
+          </div>
+        </div>
+
+        <p className="text-xs text-paper-muted text-center">
           Halaman ini otomatis update begitu pembayaran terverifikasi. Jangan tutup dulu.
         </p>
       </div>
@@ -138,78 +156,92 @@ export default function PremiumPage() {
 
   if (step === 'user_number' && selected) {
     return (
-      <div className="flex flex-col gap-4">
-        <button onClick={() => setStep('pick')} className="text-sm text-white/50 text-left">
+      <div className="flex flex-col gap-5 animate-rise-in">
+        <button onClick={() => setStep('pick')} className="text-xs text-paper-muted w-fit hover:text-paper transition">
           ‹ Kembali
         </button>
-        <h2 className="text-lg font-bold">{selected.label}</h2>
-        <p className="text-sm text-white/60">
-          {selected.duration_days} hari premium · {formatRupiah(selected.price)}
-          {!!selected.bonus_diamond && (
-            <span className="text-emerald-400"> · Bonus {selected.bonus_diamond} Diamond</span>
-          )}
-        </p>
+
+        <div className="rounded-2xl border border-ink-line bg-ink-raised p-4">
+          <p className="font-display font-bold text-base">{selected.label}</p>
+          <p className="mt-1 text-xs text-paper-muted">
+            {selected.duration_days} hari premium · <span className="text-paper font-semibold">{formatRupiah(selected.price)}</span>
+            {!!selected.bonus_diamond && (
+              <span className="text-good"> · Bonus {selected.bonus_diamond} Diamond</span>
+            )}
+          </p>
+        </div>
 
         <div>
-          <label className="text-xs text-white/50">ID Aniku kamu</label>
+          <label className="text-xs text-paper-muted">ID Aniku kamu</label>
           <input
             type="number"
             inputMode="numeric"
             value={userNumber}
             onChange={(e) => setUserNumber(e.target.value)}
             placeholder="misal: 1409"
-            className="mt-1 w-full rounded-xl bg-aniku-card border border-aniku-border px-4 py-3 text-sm outline-none focus:border-aniku-gold/60"
+            className="mt-1.5 w-full rounded-xl bg-ink-field border border-ink-line px-4 py-3 text-sm font-mono outline-none transition focus:border-gold/60"
           />
-          <p className="mt-1 text-[11px] text-white/40">
+          <p className="mt-1.5 text-[11px] text-paper-muted">
             ID ini ada di profil kamu di app Aniku (angka setelah tanda #), biar Premium-nya kekirim ke akun yang tepat.
           </p>
         </div>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-bad">{error}</p>}
 
         <button
           disabled={!userNumber.trim() || submitting}
           onClick={handleSubmitUserNumber}
-          className="rounded-full bg-aniku-gold text-black font-semibold py-3 text-sm disabled:opacity-40"
+          className="rounded-full bg-gold text-ink font-bold py-3.5 text-sm transition hover:bg-gold-dark hover:text-paper disabled:opacity-40 disabled:hover:bg-gold disabled:hover:text-ink"
         >
-          {submitting ? 'Memproses...' : 'Buat Pesanan'}
+          {submitting ? 'Memproses...' : 'Buat pesanan'}
         </button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-lg font-bold">Aniku Premium</h1>
-      <p className="text-sm text-white/50">Pilih paket, isi ID Aniku, bayar QRIS.</p>
+    <div className="flex flex-col gap-5 animate-rise-in">
+      <Link href="/" className="text-xs text-paper-muted w-fit hover:text-paper transition">
+        ‹ Kembali
+      </Link>
 
-      {loadingPackages && <p className="text-sm text-white/40">Memuat paket...</p>}
+      <div>
+        <h1 className="font-display font-bold text-xl">Aniku Premium</h1>
+        <p className="mt-1 text-sm text-paper-muted">Pilih paket, isi ID Aniku, bayar QRIS.</p>
+      </div>
 
-      {packages.map((pkg) => (
-        <div key={pkg.id} className="rounded-2xl border border-aniku-border bg-aniku-card p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="font-bold">{pkg.label}</p>
-              <p className="text-xs text-white/50">{pkg.duration_days} hari premium</p>
-              {!!pkg.bonus_diamond && (
-                <p className="text-xs text-emerald-400 font-semibold mt-1">
-                  ✨ Bonus Diamond: {pkg.bonus_diamond}
-                </p>
-              )}
-            </div>
-            <p className="font-bold text-sky-400">{formatRupiah(pkg.price)}</p>
-          </div>
-          <button
-            onClick={() => {
-              setSelected(pkg);
-              setStep('user_number');
-            }}
-            className="mt-3 w-full rounded-full border border-aniku-gold/60 text-aniku-gold font-semibold py-2 text-sm"
+      {loadingPackages && <p className="text-sm text-paper-muted">Memuat paket...</p>}
+
+      <div className="flex flex-col gap-3">
+        {packages.map((pkg) => (
+          <div
+            key={pkg.id}
+            className="foil-card rounded-2xl border border-ink-line bg-gradient-to-br from-[#2A2016] via-ink-raised to-ink-raised p-4 shadow-card"
           >
-            Pilih Paket
-          </button>
-        </div>
-      ))}
+            <div className="relative z-[2] flex items-start justify-between gap-3">
+              <div>
+                <p className="font-display font-bold text-base">{pkg.label}</p>
+                <p className="text-xs text-paper-muted mt-0.5">{pkg.duration_days} hari premium</p>
+                {!!pkg.bonus_diamond && (
+                  <p className="text-xs text-good font-semibold mt-1.5">
+                    ✨ Bonus {pkg.bonus_diamond} Diamond
+                  </p>
+                )}
+              </div>
+              <p className="font-mono font-semibold text-gold shrink-0">{formatRupiah(pkg.price)}</p>
+            </div>
+            <button
+              onClick={() => {
+                setSelected(pkg);
+                setStep('user_number');
+              }}
+              className="relative z-[2] mt-3 w-full rounded-full border border-gold/50 text-gold font-bold py-2.5 text-sm transition hover:bg-gold hover:text-ink"
+            >
+              Pilih paket
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
