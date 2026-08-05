@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ChevronLeft, ExternalLink, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Sparkles } from 'lucide-react';
 import { supabasePublic } from '@/lib/supabasePublic';
 import type { PremiumPackage, CheckoutResponse } from '@/lib/types';
 
@@ -80,8 +80,12 @@ export default function PremiumPage() {
   if (step === 'success') {
     return (
       <div className="flex flex-col items-center text-center gap-4 pt-10 animate-rise-in">
-        <div className="w-16 h-16 rounded-full bg-good/15 flex items-center justify-center">
-          <CheckCircle2 size={30} strokeWidth={2} className="text-good" />
+        <div className="relative w-20 h-20 flex items-center justify-center">
+          <span className="absolute inset-0 rounded-full bg-good/20 animate-ring-pulse" />
+          <span className="absolute inset-0 rounded-full bg-good/20 animate-ring-pulse-delay" />
+          <div className="relative w-16 h-16 rounded-full bg-good/15 flex items-center justify-center animate-pop-in">
+            <CheckCircle2 size={30} strokeWidth={2} className="text-good" />
+          </div>
         </div>
         <div>
           <h2 className="font-display font-bold text-lg">Pembayaran berhasil</h2>
@@ -136,17 +140,6 @@ export default function PremiumPage() {
                 <span className="text-paper-muted">Ref. transaksi</span>
                 <span className="font-mono tabular text-paper">{invoice.merchant_ref}</span>
               </div>
-            )}
-            {invoice.checkout_url && (
-              <a
-                href={invoice.checkout_url}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center gap-1.5 rounded-full border border-ink-line py-2.5 text-sm font-semibold transition hover:border-gold/60 hover:text-gold"
-              >
-                Buka halaman pembayaran
-                <ExternalLink size={14} strokeWidth={2.25} />
-              </a>
             )}
           </div>
         </div>
