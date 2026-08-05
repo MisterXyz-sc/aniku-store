@@ -64,7 +64,7 @@ export default function HomePage() {
           </span>
 
           <h1 className="font-display font-bold text-[28px] leading-[1.15]">
-            Top-up &amp; Premium Aniku, tanpa buka Play Store.
+            Top-up &amp; Premium Aniku, tanpa buka app Aniku.
           </h1>
 
           <p className="text-sm text-paper-muted leading-relaxed">
