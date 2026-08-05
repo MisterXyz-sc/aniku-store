@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Download, Wallet, Info } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Download, Info } from 'lucide-react';
 import type { CheckoutResponse } from '@/lib/types';
 
 type Step = 'amount' | 'paying' | 'success';
@@ -139,24 +139,12 @@ export default function DiamondPage() {
           </div>
 
           {invoice.qr && (
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={handleDownloadQR}
-                className="flex-1 flex items-center justify-center gap-1.5 rounded-full border border-ink-line text-paper font-semibold py-2.5 text-xs transition hover:border-diamond/60 hover:text-diamond"
-              >
-                <Download size={14} strokeWidth={2.5} /> Download QRIS
-              </button>
-              {invoice.checkout_url && (
-                <a
-                  href={invoice.checkout_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-full bg-diamond text-ink font-bold py-2.5 text-xs transition hover:bg-diamond-dark hover:text-paper"
-                >
-                  <Wallet size={14} strokeWidth={2.5} /> Buka E-Wallet
-                </a>
-              )}
-            </div>
+            <button
+              onClick={handleDownloadQR}
+              className="flex items-center justify-center gap-1.5 rounded-full border border-ink-line text-paper font-semibold py-2.5 text-xs mt-4 transition hover:border-diamond/60 hover:text-diamond"
+            >
+              <Download size={14} strokeWidth={2.5} /> Download QRIS
+            </button>
           )}
 
           <div className="ticket-divider" />
@@ -174,7 +162,7 @@ export default function DiamondPage() {
         <div className="rounded-2xl border border-ink-line bg-ink-raised p-4">
           <p className="text-xs font-bold text-paper mb-2">Cara bayar</p>
           <ol className="flex flex-col gap-1.5 text-xs text-paper-muted list-decimal list-inside">
-            <li>Buka app e-wallet atau m-banking kamu, atau tap tombol &quot;Buka E-Wallet&quot; di atas.</li>
+            <li>Buka app e-wallet atau m-banking kamu (Gopay, OVO, Dana, ShopeePay, dll).</li>
             <li>Pilih Scan QRIS, lalu arahkan kamera ke kode QR di atas (atau pakai QRIS yang di-download).</li>
             <li>Cek nominal <span className="text-paper font-semibold">{formatRupiah(amount)}</span> udah sesuai, lalu bayar.</li>
             <li>Tunggu beberapa detik, halaman ini otomatis update begitu pembayaran terverifikasi.</li>
