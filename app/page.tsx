@@ -1,5 +1,15 @@
 import Link from 'next/link';
-import { Crown, Gem, ShieldCheck, Zap, Clock3, ArrowRight, ListChecks, HelpCircle } from 'lucide-react';
+import {
+  Crown,
+  Gem,
+  ShieldCheck,
+  Zap,
+  Clock3,
+  ArrowRight,
+  ArrowDown,
+  ListChecks,
+  HelpCircle
+} from 'lucide-react';
 
 const STEPS = [
   {
@@ -37,13 +47,60 @@ const FAQS = [
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col gap-8 animate-rise-in">
-      <div>
-        <h1 className="font-display font-bold text-2xl leading-tight">Mau beli apa hari ini?</h1>
-        <p className="mt-1 text-sm text-paper-muted">Pilih produk, isi ID Aniku kamu, bayar QRIS.</p>
-      </div>
+    <div className="flex flex-col animate-rise-in">
+      {/* Hero */}
+      <section className="relative pt-2 pb-10 -mx-5 px-5 overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full opacity-30 blur-3xl"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(255,62,118,0.55) 0%, rgba(51,216,242,0.25) 45%, transparent 70%)'
+          }}
+        />
+        <div className="relative flex flex-col items-start gap-4">
+          <span className="text-[10px] font-bold tracking-[0.16em] text-brand bg-brand/10 border border-brand/20 rounded-full px-3 py-1.5">
+            TOKO RESMI · ANIKU
+          </span>
 
-      <div className="flex flex-col gap-4">
+          <h1 className="font-display font-bold text-[28px] leading-[1.15]">
+            Top-up &amp; Premium Aniku, tanpa buka Play Store.
+          </h1>
+
+          <p className="text-sm text-paper-muted leading-relaxed">
+            Beli Premium atau Diamond langsung dari browser, bayar QRIS, masuk otomatis ke akunmu —
+            gak perlu update app, gak ada potongan platform.
+          </p>
+
+          <a
+            href="#produk"
+            className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-paper bg-ink-raised border border-ink-line rounded-full px-4 py-2.5 transition hover:border-brand/50 hover:text-brand"
+          >
+            Lihat produk
+            <ArrowDown size={14} strokeWidth={2.5} />
+          </a>
+
+          <div className="mt-2 flex items-center gap-4 text-[11px] text-paper-muted">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck size={14} strokeWidth={2.25} className="text-good" /> QRIS resmi
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Zap size={14} strokeWidth={2.25} className="text-gold" /> Otomatis masuk
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock3 size={14} strokeWidth={2.25} className="text-diamond" /> 24 jam
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Product picker */}
+      <section id="produk" className="flex flex-col gap-4 scroll-mt-6">
+        <div>
+          <h2 className="font-display font-bold text-xl">Pilih produk</h2>
+          <p className="mt-1 text-sm text-paper-muted">Isi ID Aniku kamu, bayar QRIS, selesai.</p>
+        </div>
+
         <Link
           href="/premium"
           className="foil-card group rounded-2xl border border-ink-line bg-gradient-to-br from-[#2A2016] via-ink-raised to-ink-raised p-5 shadow-card transition hover:border-gold/50"
@@ -95,21 +152,10 @@ export default function HomePage() {
             <ArrowRight size={14} strokeWidth={2.5} className="transition group-hover:translate-x-0.5" />
           </div>
         </Link>
-      </div>
+      </section>
 
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-ink-line bg-ink-raised/50 px-4 py-3 text-[11px] text-paper-muted">
-        <span className="flex items-center gap-1.5">
-          <ShieldCheck size={14} strokeWidth={2.25} className="text-good" /> QRIS resmi
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Zap size={14} strokeWidth={2.25} className="text-gold" /> Otomatis masuk
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Clock3 size={14} strokeWidth={2.25} className="text-diamond" /> 24 jam
-        </span>
-      </div>
-
-      <section className="flex flex-col gap-4">
+      {/* How it works */}
+      <section className="flex flex-col gap-4 mt-10">
         <div className="flex items-center gap-2">
           <ListChecks size={16} strokeWidth={2.25} className="text-brand" />
           <h2 className="font-display font-bold text-base">Cara kerja</h2>
@@ -129,7 +175,8 @@ export default function HomePage() {
         </ol>
       </section>
 
-      <section className="flex flex-col gap-4">
+      {/* FAQ */}
+      <section className="flex flex-col gap-4 mt-10">
         <div className="flex items-center gap-2">
           <HelpCircle size={16} strokeWidth={2.25} className="text-brand" />
           <h2 className="font-display font-bold text-base">Pertanyaan umum</h2>
