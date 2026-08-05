@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Sparkles, Download, Info } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Sparkles, Download, Info, Globe, ArrowRight } from 'lucide-react';
 import { supabasePublic } from '@/lib/supabasePublic';
 import type { PremiumPackage, CheckoutResponse } from '@/lib/types';
 
@@ -251,6 +251,20 @@ export default function PremiumPage() {
         <p className="mt-1 text-sm text-paper-muted">Pilih paket, isi ID Aniku, bayar QRIS.</p>
       </div>
 
+      <Link
+        href="/premium/manual"
+        className="flex items-center gap-3 rounded-2xl border border-ink-line bg-ink-raised/60 p-3.5 transition hover:border-brand/40"
+      >
+        <div className="w-10 h-10 shrink-0 rounded-xl bg-brand/15 flex items-center justify-center">
+          <Globe size={18} strokeWidth={2.25} className="text-brand" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold">Bayar dari luar negeri</p>
+          <p className="text-xs text-paper-muted">E-wallet Malaysia dll yang gak kebaca QRIS otomatis</p>
+        </div>
+        <ArrowRight size={16} strokeWidth={2.5} className="text-paper-muted shrink-0" />
+      </Link>
+
       {loadingPackages && <p className="text-sm text-paper-muted">Memuat paket...</p>}
 
       <div className="flex flex-col gap-3">
@@ -283,13 +297,6 @@ export default function PremiumPage() {
           </div>
         ))}
       </div>
-
-      <Link
-        href="/premium/manual"
-        className="text-center text-xs text-paper-muted underline decoration-dotted underline-offset-4 hover:text-paper transition"
-      >
-        Bayar dari luar negeri (Malaysia, dll)?
-      </Link>
     </div>
   );
 }

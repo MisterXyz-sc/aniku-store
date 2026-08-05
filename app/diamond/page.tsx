@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Download, Info } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Download, Info, Globe, ArrowRight } from 'lucide-react';
 import type { CheckoutResponse } from '@/lib/types';
 
 type Step = 'amount' | 'paying' | 'success';
@@ -189,6 +189,20 @@ export default function DiamondPage() {
         <p className="mt-1 text-sm text-paper-muted">Dipakai buat bikin &amp; kontribusi Clan.</p>
       </div>
 
+      <Link
+        href="/diamond/manual"
+        className="flex items-center gap-3 rounded-2xl border border-ink-line bg-ink-raised/60 p-3.5 transition hover:border-diamond/40"
+      >
+        <div className="w-10 h-10 shrink-0 rounded-xl bg-diamond/15 flex items-center justify-center">
+          <Globe size={18} strokeWidth={2.25} className="text-diamond" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold">Bayar dari luar negeri</p>
+          <p className="text-xs text-paper-muted">E-wallet Malaysia dll yang gak kebaca QRIS otomatis</p>
+        </div>
+        <ArrowRight size={16} strokeWidth={2.5} className="text-paper-muted shrink-0" />
+      </Link>
+
       <div className="flex gap-2">
         {PRESETS.map((p) => (
           <button
@@ -249,13 +263,6 @@ export default function DiamondPage() {
         {submitting && <Loader2 size={16} strokeWidth={2.5} className="animate-spin" />}
         {submitting ? 'Memproses...' : 'Buat pesanan'}
       </button>
-
-      <Link
-        href="/diamond/manual"
-        className="text-center text-xs text-paper-muted underline decoration-dotted underline-offset-4 hover:text-paper transition"
-      >
-        Bayar dari luar negeri (Malaysia, dll)?
-      </Link>
     </div>
   );
 }
