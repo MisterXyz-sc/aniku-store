@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Info, Upload, Clock, Download } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Info, Upload, Clock, Download, Copy, Check } from 'lucide-react';
 import { supabasePublic } from '@/lib/supabasePublic';
 import type { PremiumPackage, ManualCheckoutResponse } from '@/lib/types';
+import { buildResumeCode } from '@/lib/resumeCode';
+import { savePendingOrder, removePendingOrder } from '@/lib/pendingOrders';
 
 type Step = 'pick' | 'user_number' | 'proof' | 'waiting' | 'success';
 
@@ -18,6 +20,7 @@ export default function PremiumManualPage() {
   const [order, setOrder] = useState<ManualCheckoutResponse | null>(null);
   const [note, setNote] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     supabasePublic
@@ -40,6 +43,9 @@ export default function PremiumManualPage() {
         const json = await res.json();
         if (json.status === 'ready' || json.status === 'claimed') {
           setStep('success');
+          if (order.claim_id && order.proof_token) {
+            removePendingOrder(buildResumeCode({ type: 'premium', id: order.claim_id, token: order.proof_token }));
+          }
           clearInterval(interval);
         }
       } catch {
@@ -86,6 +92,16 @@ export default function PremiumManualPage() {
       }
       setOrder(json);
       setStep('proof');
+      if (json.claim_id && json.proof_token) {
+        savePendingOrder({
+          resumeCode: buildResumeCode({ type: 'premium', id: json.claim_id, token: json.proof_token }),
+          type: 'premium',
+          label: selected.label,
+          amount: json.amount ?? selected.price,
+          username: json.username,
+          created_at: new Date().toISOString()
+        });
+      }
     } catch {
       setError('Gagal menghubungi server, coba lagi.');
     } finally {
@@ -169,6 +185,13 @@ export default function PremiumManualPage() {
         {order?.merchant_ref && (
           <p className="font-mono text-xs text-paper-muted">Ref: {order.merchant_ref}</p>
         )}
+        <p className="text-[11px] text-paper-muted max-w-xs">
+          Nutup halaman ini gapapa -- kode lanjutan yang tadi udah disimpen di{' '}
+          <Link href="/lanjutkan" className="text-gold underline">
+            /lanjutkan
+          </Link>{' '}
+          buat cek lagi nanti.
+        </p>
       </div>
     );
   }
@@ -202,6 +225,34 @@ export default function PremiumManualPage() {
               <div className="flex items-center justify-between text-xs">
                 <span className="text-paper-muted">Ref. transaksi</span>
                 <span className="font-mono tabular text-paper">{order.merchant_ref}</span>
+              </div>
+            )}
+            {order.proof_token && order.claim_id && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-paper-muted">Kode lanjutan (simpen kalau belum sempet kirim bukti)</span>
+                <div className="flex items-center gap-2">
+                  <span className="flex-1 min-w-0 font-mono text-[10px] text-paper bg-ink-field rounded-lg px-2.5 py-2 break-all">
+                    {buildResumeCode({ type: 'premium', id: order.claim_id, token: order.proof_token })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(
+                          buildResumeCode({ type: 'premium', id: order.claim_id as string, token: order.proof_token as string })
+                        );
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      } catch {
+                        // clipboard gak diizinin -- gapapa, kodenya udah keliatan, bisa diseleksi manual
+                      }
+                    }}
+                    className="flex items-center justify-center gap-1 shrink-0 rounded-lg border border-ink-line px-2.5 py-2 text-[11px] font-semibold text-paper-muted transition hover:border-gold/60 hover:text-gold"
+                  >
+                    {copied ? <Check size={13} strokeWidth={2.5} /> : <Copy size={13} strokeWidth={2.5} />}
+                    {copied ? 'Kesalin' : 'Salin'}
+                  </button>
+                </div>
               </div>
             )}
           </div>
