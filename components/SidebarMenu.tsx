@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Crown, Gem, Globe, Search, Home } from 'lucide-react';
+import { Menu, X, Crown, Gem, Globe, Search, Home, History } from 'lucide-react';
 
 type NavItem = {
   href: string;
@@ -153,6 +153,20 @@ export default function SidebarMenu() {
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-paper">Cek status transaksi</p>
                 <p className="text-[11px] text-paper-muted truncate">Lacak pesanan pake ID Aniku / ref</p>
+              </div>
+            </Link>
+            <Link
+              href="/riwayat"
+              className={`flex items-center gap-3 rounded-xl px-2.5 py-2 transition ${
+                pathname === '/riwayat' ? 'bg-ink-field' : 'hover:bg-ink-field/60'
+              }`}
+            >
+              <div className="w-8 h-8 shrink-0 rounded-lg bg-good/15 flex items-center justify-center">
+                <History size={15} strokeWidth={2.25} className="text-good" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-paper">Riwayat transaksi</p>
+                <p className="text-[11px] text-paper-muted truncate">Transaksi berhasil dari semua user</p>
               </div>
             </Link>
           </div>

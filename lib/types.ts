@@ -66,3 +66,18 @@ export interface TransactionLookupResponse {
   items?: TransactionItem[];
   error?: string;
 }
+
+// --- Riwayat transaksi berhasil (publik, semua user) ---
+
+export interface HistoryItem {
+  type: 'premium' | 'diamond';
+  username: string; // udah disamarin sebagian, misal "Bud***"
+  label: string;
+  amount: number; // rupiah
+  created_at: string;
+}
+
+export interface HistoryResponse {
+  items?: HistoryItem[];
+  error?: string;
+}
