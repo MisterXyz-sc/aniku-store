@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Baloo_2, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
+import SidebarMenu from '@/components/SidebarMenu';
 import './globals.css';
 
 const display = Baloo_2({
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 STORE
               </span>
             </div>
+            <SidebarMenu />
           </header>
 
           <main className="flex-1 px-5 pb-8">{children}</main>
