@@ -249,6 +249,13 @@ export default function DiamondPage() {
         {submitting && <Loader2 size={16} strokeWidth={2.5} className="animate-spin" />}
         {submitting ? 'Memproses...' : 'Buat pesanan'}
       </button>
+
+      <Link
+        href="/diamond/manual"
+        className="text-center text-xs text-paper-muted underline decoration-dotted underline-offset-4 hover:text-paper transition"
+      >
+        Bayar dari luar negeri (Malaysia, dll)?
+      </Link>
     </div>
   );
 }

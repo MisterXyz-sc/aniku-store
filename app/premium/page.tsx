@@ -283,6 +283,13 @@ export default function PremiumPage() {
           </div>
         ))}
       </div>
+
+      <Link
+        href="/premium/manual"
+        className="text-center text-xs text-paper-muted underline decoration-dotted underline-offset-4 hover:text-paper transition"
+      >
+        Bayar dari luar negeri (Malaysia, dll)?
+      </Link>
     </div>
   );
 }
