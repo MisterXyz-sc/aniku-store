@@ -30,3 +30,12 @@ on conflict (id) do nothing;
 -- Gak perlu bikin RLS policy buat storage.objects di bucket ini -- semua
 -- upload & baca dilakuin server-side pake service role key (bypass RLS),
 -- jadi anon/browser emang gak boleh akses langsung.
+
+-- 4. FIX IDOR: token rahasia per transaksi manual, dipakai buat verifikasi
+--    pas submit bukti bayar di /api/manual-proof. Tanpa ini, siapapun yang
+--    tau/nebak id atau payment_ref bisa upload/overwrite bukti punya orang lain.
+alter table public.premium_claims
+  add column if not exists proof_token text;
+
+alter table public.diamond_topups
+  add column if not exists proof_token text;

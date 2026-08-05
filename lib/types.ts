@@ -29,6 +29,7 @@ export interface ManualCheckoutResponse {
   amount?: number;
   diamond_amount?: number;
   username?: string;
+  proof_token?: string; // WAJIB dikirim balik pas /api/manual-proof -- bukti kepemilikan transaksi
   error?: string;
 }
 

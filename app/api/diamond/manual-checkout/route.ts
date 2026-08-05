@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
 
     const diamondAmount = Math.floor(amount / RUPIAH_PER_DIAMOND);
     const merchantRef = `MANUAL-DMD-${crypto.randomUUID().slice(0, 8).toUpperCase()}-${Date.now()}`;
+    // Token rahasia -- HANYA dibalikin ke client yang bikin transaksi ini.
+    // Dipakai buat verifikasi kepemilikan pas submit bukti bayar di
+    // /api/manual-proof, biar id/payment_ref doang gak cukup buat orang lain
+    // upload/overwrite bukti punya user ini.
+    const proofToken = crypto.randomUUID();
 
     const { error: insertErr } = await supabaseAdmin.from('diamond_topups').insert({
       user_id: profile.id,
@@ -44,7 +49,8 @@ export async function POST(req: NextRequest) {
       payment_status: 'pending',
       status: 'pending',
       payment_method: 'manual_qris',
-      manual_review_status: 'awaiting_proof'
+      manual_review_status: 'awaiting_proof',
+      proof_token: proofToken
     });
 
     if (insertErr) {
@@ -56,7 +62,8 @@ export async function POST(req: NextRequest) {
       merchant_ref: merchantRef,
       amount,
       diamond_amount: diamondAmount,
-      username: profile.username
+      username: profile.username,
+      proof_token: proofToken
     });
   } catch (e) {
     console.error(e);

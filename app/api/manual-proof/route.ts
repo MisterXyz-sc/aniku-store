@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     const form = await req.formData();
     const type = form.get('type'); // 'premium' | 'diamond'
     const id = form.get('id'); // claim_id (premium) atau merchant_ref (diamond)
+    const token = form.get('token'); // proof_token -- WAJIB, bukti kepemilikan transaksi
     const note = form.get('note');
     const file = form.get('file');
 
@@ -20,6 +21,11 @@ export async function POST(req: NextRequest) {
     }
     if (!id || typeof id !== 'string') {
       return NextResponse.json({ error: 'ID transaksi wajib diisi' }, { status: 400 });
+    }
+    if (!token || typeof token !== 'string') {
+      // Tanpa token ini siapapun yang tau/nebak id/payment_ref bisa upload
+      // bukti buat transaksi orang lain (IDOR) -- jadi ini wajib, bukan opsional.
+      return NextResponse.json({ error: 'Token transaksi gak valid' }, { status: 401 });
     }
     if (!(file instanceof File)) {
       return NextResponse.json({ error: 'Bukti bayar (gambar) wajib diupload' }, { status: 400 });
@@ -36,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     const { data: row, error: rowErr } = await supabaseAdmin
       .from(table)
-      .select('id, status, payment_method')
+      .select('id, status, payment_method, proof_token')
       .eq(matchColumn, id)
       .maybeSingle();
 
@@ -46,9 +52,19 @@ export async function POST(req: NextRequest) {
     if (row.payment_method !== 'manual_qris') {
       return NextResponse.json({ error: 'Transaksi ini bukan pembayaran manual' }, { status: 400 });
     }
+    // Cek kepemilikan: token yang dikirim harus SAMA PERSIS dengan yang
+    // disimpan pas checkout. Ini yang mencegah orang lain (yang cuma tau
+    // id/payment_ref, misal lewat /api/transactions) upload/overwrite bukti
+    // punya user lain.
+    if (!row.proof_token || row.proof_token !== token) {
+      return NextResponse.json({ error: 'Token gak cocok, transaksi ini bukan punya kamu' }, { status: 403 });
+    }
 
-    const ext = file.name.split('.').pop() || 'jpg';
-    const path = `${type}/${id}-${Date.now()}.${ext}`;
+    // Pakai row.id (primary key dari DB, bukan input client mentah) buat
+    // nama file storage -- biar gak ada celah path traversal / karakter aneh
+    // dari `id` client masuk ke path bucket.
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const path = `${type}/${row.id}-${Date.now()}.${ext}`;
     const arrayBuffer = await file.arrayBuffer();
 
     const { error: uploadErr } = await supabaseAdmin.storage
@@ -67,7 +83,7 @@ export async function POST(req: NextRequest) {
         manual_note: typeof note === 'string' ? note.slice(0, 500) : null,
         manual_review_status: 'submitted'
       })
-      .eq(matchColumn, id);
+      .eq('id', row.id); // update row yang udah diverifikasi tokennya, bukan re-match by id/ref
 
     if (updateErr) {
       console.error('Failed to save proof reference:', updateErr);

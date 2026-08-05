@@ -37,6 +37,11 @@ export async function POST(req: NextRequest) {
 
     const code = 'ANK-' + Math.random().toString(16).slice(2, 8).toUpperCase();
     const merchantRef = `MANUAL-${code}-${Date.now()}`;
+    // Token rahasia -- HANYA dibalikin ke client yang bikin transaksi ini.
+    // Dipakai buat verifikasi kepemilikan pas submit bukti bayar di
+    // /api/manual-proof, biar claim_id doang gak cukup buat orang lain
+    // upload/overwrite bukti punya user ini.
+    const proofToken = crypto.randomUUID();
 
     // status tetep 'pending' (SAMA kayak flow Sakurupiah) -- biar RPC
     // grant_premium_from_claim yang dipanggil pas admin approve nanti gak
@@ -54,7 +59,8 @@ export async function POST(req: NextRequest) {
         status: 'pending',
         payment_ref: merchantRef,
         payment_method: 'manual_qris',
-        manual_review_status: 'awaiting_proof'
+        manual_review_status: 'awaiting_proof',
+        proof_token: proofToken
       })
       .select()
       .single();
@@ -68,7 +74,8 @@ export async function POST(req: NextRequest) {
       claim_id: claim.id,
       merchant_ref: merchantRef,
       amount: pkg.price,
-      username: profile.username
+      username: profile.username,
+      proof_token: proofToken
     });
   } catch (e) {
     console.error(e);

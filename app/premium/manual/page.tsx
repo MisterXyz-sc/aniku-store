@@ -101,6 +101,7 @@ export default function PremiumManualPage() {
       const form = new FormData();
       form.set('type', 'premium');
       form.set('id', order.claim_id);
+      form.set('token', order.proof_token ?? '');
       form.set('note', note);
       form.set('file', file);
       const res = await fetch('/api/manual-proof', { method: 'POST', body: form });

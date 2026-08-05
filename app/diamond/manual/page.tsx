@@ -91,6 +91,7 @@ export default function DiamondManualPage() {
       const form = new FormData();
       form.set('type', 'diamond');
       form.set('id', order.merchant_ref);
+      form.set('token', order.proof_token ?? '');
       form.set('note', note);
       form.set('file', file);
       const res = await fetch('/api/manual-proof', { method: 'POST', body: form });
