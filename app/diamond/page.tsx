@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ChevronLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Download, Wallet, Info } from 'lucide-react';
 import type { CheckoutResponse } from '@/lib/types';
 
 type Step = 'amount' | 'paying' | 'success';
@@ -37,6 +37,24 @@ export default function DiamondPage() {
     }, 4000);
     return () => clearInterval(interval);
   }, [step, topupRef]);
+
+  async function handleDownloadQR() {
+    if (!invoice?.qr) return;
+    try {
+      const res = await fetch(invoice.qr);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `qris-aniku-${invoice.merchant_ref ?? 'diamond'}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(invoice.qr, '_blank');
+    }
+  }
 
   async function handleSubmit() {
     if (!userNumber.trim() || amount < 500) return;
@@ -120,6 +138,27 @@ export default function DiamondPage() {
             )}
           </div>
 
+          {invoice.qr && (
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={handleDownloadQR}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-full border border-ink-line text-paper font-semibold py-2.5 text-xs transition hover:border-diamond/60 hover:text-diamond"
+              >
+                <Download size={14} strokeWidth={2.5} /> Download QRIS
+              </button>
+              {invoice.checkout_url && (
+                <a
+                  href={invoice.checkout_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-full bg-diamond text-ink font-bold py-2.5 text-xs transition hover:bg-diamond-dark hover:text-paper"
+                >
+                  <Wallet size={14} strokeWidth={2.5} /> Buka E-Wallet
+                </a>
+              )}
+            </div>
+          )}
+
           <div className="ticket-divider" />
 
           <div className="px-5 pt-4 pb-5 flex flex-col gap-3">
@@ -132,8 +171,20 @@ export default function DiamondPage() {
           </div>
         </div>
 
-        <p className="text-xs text-paper-muted text-center">
-          Halaman ini otomatis update begitu pembayaran terverifikasi. Jangan tutup dulu.
+        <div className="rounded-2xl border border-ink-line bg-ink-raised p-4">
+          <p className="text-xs font-bold text-paper mb-2">Cara bayar</p>
+          <ol className="flex flex-col gap-1.5 text-xs text-paper-muted list-decimal list-inside">
+            <li>Buka app e-wallet atau m-banking kamu, atau tap tombol &quot;Buka E-Wallet&quot; di atas.</li>
+            <li>Pilih Scan QRIS, lalu arahkan kamera ke kode QR di atas (atau pakai QRIS yang di-download).</li>
+            <li>Cek nominal <span className="text-paper font-semibold">{formatRupiah(amount)}</span> udah sesuai, lalu bayar.</li>
+            <li>Tunggu beberapa detik, halaman ini otomatis update begitu pembayaran terverifikasi.</li>
+          </ol>
+        </div>
+
+        <p className="flex items-start gap-1.5 text-xs text-paper-muted">
+          <Info size={14} strokeWidth={2.25} className="shrink-0 mt-0.5" />
+          Halaman ini otomatis update begitu pembayaran terverifikasi, jangan tutup dulu. Kalau udah bayar tapi halaman ini gak berubah,
+          coba buka lagi app Aniku-nya — biasanya Diamond udah nambah walau halaman ini belum ke-refresh.
         </p>
       </div>
     );
