@@ -4,21 +4,22 @@ import { createSakurupiahInvoice } from '@/lib/sakurupiah';
 
 export async function POST(req: NextRequest) {
   try {
-    const { username, package_id } = await req.json();
+    const { user_number: rawUserNumber, package_id } = await req.json();
+    const userNumber = Math.floor(Number(rawUserNumber));
 
-    if (!username || !package_id) {
-      return NextResponse.json({ error: 'Username dan paket wajib diisi' }, { status: 400 });
+    if (!rawUserNumber || isNaN(userNumber) || userNumber <= 0 || !package_id) {
+      return NextResponse.json({ error: 'ID Aniku dan paket wajib diisi' }, { status: 400 });
     }
 
-    // 1. Cari user berdasarkan username
+    // 1. Cari user berdasarkan user_number (ID unik, gak berubah-ubah kayak username)
     const { data: profile, error: profileErr } = await supabaseAdmin
       .from('profiles')
       .select('id, username')
-      .eq('username', username)
+      .eq('user_number', userNumber)
       .maybeSingle();
 
     if (profileErr || !profile) {
-      return NextResponse.json({ error: 'Username gak ditemukan di Aniku' }, { status: 404 });
+      return NextResponse.json({ error: 'ID Aniku gak ditemukan' }, { status: 404 });
     }
 
     // 2. Ambil detail paket
@@ -95,7 +96,8 @@ export async function POST(req: NextRequest) {
       claim_id: claim.id,
       qr: invoice.qr,
       checkout_url: invoice.checkoutUrl,
-      merchant_ref: merchantRef
+      merchant_ref: merchantRef,
+      username: profile.username
     });
   } catch (e) {
     console.error(e);

@@ -10,7 +10,7 @@ const RUPIAH_PER_DIAMOND = 4; // Rp4 = 1 DM, samain kayak rasio di app
 
 export default function DiamondPage() {
   const [amount, setAmount] = useState<number>(20000);
-  const [username, setUsername] = useState('');
+  const [userNumber, setUserNumber] = useState('');
   const [step, setStep] = useState<Step>('amount');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -37,14 +37,14 @@ export default function DiamondPage() {
   }, [step, topupRef]);
 
   async function handleSubmit() {
-    if (!username.trim() || amount < 500) return;
+    if (!userNumber.trim() || amount < 500) return;
     setSubmitting(true);
     setError(null);
     try {
       const res = await fetch('/api/diamond/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim(), amount })
+        body: JSON.stringify({ user_number: userNumber.trim(), amount })
       });
       const json: CheckoutResponse = await res.json();
       if (!res.ok || json.error) {
@@ -71,12 +71,12 @@ export default function DiamondPage() {
         <h2 className="text-lg font-bold">Pembayaran Berhasil!</h2>
         <p className="text-sm text-white/60">
           {estimatedDiamond} Diamond udah masuk ke akun{' '}
-          <span className="font-semibold text-white">{username}</span>.
+          <span className="font-semibold text-white">{invoice?.username ?? `#${userNumber}`}</span>.
         </p>
         <button
           onClick={() => {
             setStep('amount');
-            setUsername('');
+            setUserNumber('');
             setInvoice(null);
             setTopupRef(null);
           }}
@@ -94,7 +94,7 @@ export default function DiamondPage() {
         <h2 className="text-lg font-bold">Scan QRIS Buat Bayar</h2>
         <p className="text-sm text-white/60">
           {formatRupiah(amount)} · sekitar {estimatedDiamond} Diamond untuk{' '}
-          <span className="text-white font-semibold">{username}</span>
+          <span className="text-white font-semibold">{invoice.username ?? `#${userNumber}`}</span>
         </p>
 
         {invoice.qr ? (
@@ -161,19 +161,24 @@ export default function DiamondPage() {
       </div>
 
       <div>
-        <label className="text-xs text-white/50">Username Aniku kamu</label>
+        <label className="text-xs text-white/50">ID Aniku kamu</label>
         <input
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="misal: Dayynime"
+          type="number"
+          inputMode="numeric"
+          value={userNumber}
+          onChange={(e) => setUserNumber(e.target.value)}
+          placeholder="misal: 1409"
           className="mt-1 w-full rounded-xl bg-aniku-card border border-aniku-border px-4 py-3 text-sm outline-none focus:border-sky-400/60"
         />
+        <p className="mt-1 text-[11px] text-white/40">
+          ID ini ada di profil kamu di app Aniku (angka setelah tanda #).
+        </p>
       </div>
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
       <button
-        disabled={!username.trim() || amount < 500 || submitting}
+        disabled={!userNumber.trim() || amount < 500 || submitting}
         onClick={handleSubmit}
         className="rounded-full bg-sky-400 text-black font-semibold py-3 text-sm disabled:opacity-40"
       >

@@ -11,11 +11,12 @@ const RUPIAH_PER_DIAMOND = 4;
 
 export async function POST(req: NextRequest) {
   try {
-    const { username, amount: rawAmount } = await req.json();
+    const { user_number: rawUserNumber, amount: rawAmount } = await req.json();
+    const userNumber = Math.floor(Number(rawUserNumber));
     const amount = Math.floor(Number(rawAmount));
 
-    if (!username) {
-      return NextResponse.json({ error: 'Username wajib diisi' }, { status: 400 });
+    if (!rawUserNumber || isNaN(userNumber) || userNumber <= 0) {
+      return NextResponse.json({ error: 'ID Aniku wajib diisi dengan angka yang valid' }, { status: 400 });
     }
     if (!amount || isNaN(amount) || amount < QRIS_MIN || amount > QRIS_MAX) {
       return NextResponse.json(
@@ -29,11 +30,11 @@ export async function POST(req: NextRequest) {
     const { data: profile, error: profileErr } = await supabaseAdmin
       .from('profiles')
       .select('id, username')
-      .eq('username', username)
+      .eq('user_number', userNumber)
       .maybeSingle();
 
     if (profileErr || !profile) {
-      return NextResponse.json({ error: 'Username gak ditemukan di Aniku' }, { status: 404 });
+      return NextResponse.json({ error: 'ID Aniku gak ditemukan' }, { status: 404 });
     }
 
     const diamondAmount = Math.floor(amount / RUPIAH_PER_DIAMOND);
@@ -73,7 +74,8 @@ export async function POST(req: NextRequest) {
       merchant_ref: merchantRef,
       qr: invoice.qr,
       checkout_url: invoice.checkoutUrl,
-      diamond_amount: diamondAmount
+      diamond_amount: diamondAmount,
+      username: profile.username
     });
   } catch (e) {
     console.error(e);

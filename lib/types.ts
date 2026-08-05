@@ -12,6 +12,7 @@ export interface CheckoutResponse {
   merchant_ref?: string;
   qr: string | null;
   checkout_url: string | null;
+  username?: string;
   error?: string;
 }
 

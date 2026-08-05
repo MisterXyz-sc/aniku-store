@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { supabasePublic } from '@/lib/supabasePublic';
 import type { PremiumPackage, CheckoutResponse } from '@/lib/types';
 
-type Step = 'pick' | 'username' | 'paying' | 'success';
+type Step = 'pick' | 'user_number' | 'paying' | 'success';
 
 export default function PremiumPage() {
   const [packages, setPackages] = useState<PremiumPackage[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
   const [selected, setSelected] = useState<PremiumPackage | null>(null);
-  const [username, setUsername] = useState('');
+  const [userNumber, setUserNumber] = useState('');
   const [step, setStep] = useState<Step>('pick');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -49,15 +49,15 @@ export default function PremiumPage() {
 
   const formatRupiah = (n: number) => 'Rp' + n.toLocaleString('id-ID');
 
-  async function handleSubmitUsername() {
-    if (!selected || !username.trim()) return;
+  async function handleSubmitUserNumber() {
+    if (!selected || !userNumber.trim()) return;
     setSubmitting(true);
     setError(null);
     try {
       const res = await fetch('/api/premium/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim(), package_id: selected.id })
+        body: JSON.stringify({ user_number: userNumber.trim(), package_id: selected.id })
       });
       const json: CheckoutResponse = await res.json();
       if (!res.ok || json.error) {
@@ -81,14 +81,14 @@ export default function PremiumPage() {
         <div className="text-5xl">✅</div>
         <h2 className="text-lg font-bold">Pembayaran Berhasil!</h2>
         <p className="text-sm text-white/60">
-          Premium buat akun <span className="font-semibold text-white">{username}</span> udah aktif.
+          Premium buat akun <span className="font-semibold text-white">{invoice?.username ?? `#${userNumber}`}</span> udah aktif.
           Buka lagi app Aniku buat lihat perubahannya.
         </p>
         <button
           onClick={() => {
             setStep('pick');
             setSelected(null);
-            setUsername('');
+            setUserNumber('');
             setInvoice(null);
             setClaimId(null);
           }}
@@ -105,7 +105,7 @@ export default function PremiumPage() {
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-bold">Scan QRIS Buat Bayar</h2>
         <p className="text-sm text-white/60">
-          {selected?.label} untuk <span className="text-white font-semibold">{username}</span> —{' '}
+          {selected?.label} untuk <span className="text-white font-semibold">{invoice.username ?? `#${userNumber}`}</span> —{' '}
           {formatRupiah(selected?.price ?? 0)}
         </p>
 
@@ -136,7 +136,7 @@ export default function PremiumPage() {
     );
   }
 
-  if (step === 'username' && selected) {
+  if (step === 'user_number' && selected) {
     return (
       <div className="flex flex-col gap-4">
         <button onClick={() => setStep('pick')} className="text-sm text-white/50 text-left">
@@ -151,23 +151,25 @@ export default function PremiumPage() {
         </p>
 
         <div>
-          <label className="text-xs text-white/50">Username Aniku kamu</label>
+          <label className="text-xs text-white/50">ID Aniku kamu</label>
           <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="misal: Dayynime"
+            type="number"
+            inputMode="numeric"
+            value={userNumber}
+            onChange={(e) => setUserNumber(e.target.value)}
+            placeholder="misal: 1409"
             className="mt-1 w-full rounded-xl bg-aniku-card border border-aniku-border px-4 py-3 text-sm outline-none focus:border-aniku-gold/60"
           />
           <p className="mt-1 text-[11px] text-white/40">
-            Pastiin username-nya bener persis kayak di app, biar Premium-nya kekirim ke akun yang tepat.
+            ID ini ada di profil kamu di app Aniku (angka setelah tanda #), biar Premium-nya kekirim ke akun yang tepat.
           </p>
         </div>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <button
-          disabled={!username.trim() || submitting}
-          onClick={handleSubmitUsername}
+          disabled={!userNumber.trim() || submitting}
+          onClick={handleSubmitUserNumber}
           className="rounded-full bg-aniku-gold text-black font-semibold py-3 text-sm disabled:opacity-40"
         >
           {submitting ? 'Memproses...' : 'Buat Pesanan'}
@@ -179,7 +181,7 @@ export default function PremiumPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-lg font-bold">Aniku Premium</h1>
-      <p className="text-sm text-white/50">Pilih paket, isi username, bayar QRIS.</p>
+      <p className="text-sm text-white/50">Pilih paket, isi ID Aniku, bayar QRIS.</p>
 
       {loadingPackages && <p className="text-sm text-white/40">Memuat paket...</p>}
 
@@ -200,7 +202,7 @@ export default function PremiumPage() {
           <button
             onClick={() => {
               setSelected(pkg);
-              setStep('username');
+              setStep('user_number');
             }}
             className="mt-3 w-full rounded-full border border-aniku-gold/60 text-aniku-gold font-semibold py-2 text-sm"
           >
