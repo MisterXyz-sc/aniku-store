@@ -8,6 +8,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 // biar halaman publik ini gak jadi cara gampang buat ngumpulin daftar
 // username asli + nominal semua orang.
 const LIMIT = 20;
+const FETCH_LIMIT = LIMIT * 3; // ambil lebih banyak dulu, karena abis difilter (buang yang gift/redeem code / Rp0) jumlahnya bisa susut
 const SUCCESS_STATUSES = ['ready', 'claimed', 'credited'];
 
 function maskUsername(username: string): string {
@@ -22,14 +23,16 @@ export async function GET() {
         .from('premium_claims')
         .select('target_user_id, package_id, amount_expected, created_at')
         .in('status', SUCCESS_STATUSES)
+        .not('payment_ref', 'is', null) // cuma yang lewat toko ini, bukan hadiah/redeem code dari app
         .order('created_at', { ascending: false })
-        .limit(LIMIT),
+        .limit(FETCH_LIMIT),
       supabaseAdmin
         .from('diamond_topups')
         .select('user_id, diamond_amount, amount_rupiah, created_at')
         .in('status', SUCCESS_STATUSES)
+        .not('payment_ref', 'is', null)
         .order('created_at', { ascending: false })
-        .limit(LIMIT)
+        .limit(FETCH_LIMIT)
     ]);
 
     if (premiumErr) console.error('Failed to list premium history:', premiumErr);
@@ -52,21 +55,25 @@ export async function GET() {
       (packageRows ?? []).forEach((p) => labelById.set(p.id, p.label));
     }
 
-    const premium = (premiumRows ?? []).map((row) => ({
-      type: 'premium' as const,
-      username: maskUsername(usernameById.get(row.target_user_id) ?? 'Aniku'),
-      label: labelById.get(row.package_id) ?? 'Premium',
-      amount: row.amount_expected ?? 0,
-      created_at: row.created_at
-    }));
+    const premium = (premiumRows ?? [])
+      .filter((row) => (row.amount_expected ?? 0) > 0)
+      .map((row) => ({
+        type: 'premium' as const,
+        username: maskUsername(usernameById.get(row.target_user_id) ?? 'Aniku'),
+        label: labelById.get(row.package_id) ?? 'Premium',
+        amount: row.amount_expected ?? 0,
+        created_at: row.created_at
+      }));
 
-    const diamond = (diamondRows ?? []).map((row) => ({
-      type: 'diamond' as const,
-      username: maskUsername(usernameById.get(row.user_id) ?? 'Aniku'),
-      label: `Top-up ${(row.diamond_amount ?? 0).toLocaleString('id-ID')} Diamond`,
-      amount: row.amount_rupiah ?? 0,
-      created_at: row.created_at
-    }));
+    const diamond = (diamondRows ?? [])
+      .filter((row) => (row.amount_rupiah ?? 0) > 0)
+      .map((row) => ({
+        type: 'diamond' as const,
+        username: maskUsername(usernameById.get(row.user_id) ?? 'Aniku'),
+        label: `Top-up ${(row.diamond_amount ?? 0).toLocaleString('id-ID')} Diamond`,
+        amount: row.amount_rupiah ?? 0,
+        created_at: row.created_at
+      }));
 
     const items = [...premium, ...diamond]
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
