@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Info, Upload, Clock, Download, Copy, Check } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, AlertCircle, Loader2, Info, Upload, Clock, Download, Copy, Check, Sparkles } from 'lucide-react';
 import { supabasePublic } from '@/lib/supabasePublic';
 import type { PremiumPackage, ManualCheckoutResponse } from '@/lib/types';
 import { buildResumeCode } from '@/lib/resumeCode';
@@ -321,6 +321,9 @@ export default function PremiumManualPage() {
           <p className="font-display font-bold text-base">{selected.label}</p>
           <p className="mt-1 text-xs text-paper-muted">
             {selected.duration_days} hari premium · <span className="text-paper font-semibold">{formatRupiah(selected.price)}</span>
+            {!!selected.bonus_diamond && (
+              <span className="text-good"> · Bonus {selected.bonus_diamond} Diamond</span>
+            )}
           </p>
         </div>
 
@@ -377,6 +380,11 @@ export default function PremiumManualPage() {
               <div>
                 <p className="font-display font-bold text-base">{pkg.label}</p>
                 <p className="text-xs text-paper-muted mt-0.5">{pkg.duration_days} hari premium</p>
+                {!!pkg.bonus_diamond && (
+                  <p className="flex items-center gap-1 text-xs text-good font-semibold mt-1.5">
+                    <Sparkles size={12} strokeWidth={2.5} /> Bonus {pkg.bonus_diamond} Diamond
+                  </p>
+                )}
               </div>
               <p className="font-mono font-semibold text-gold shrink-0">{formatRupiah(pkg.price)}</p>
             </div>
